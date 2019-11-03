@@ -1,0 +1,38 @@
+---
+title: "rGREAT_analysis_mmDCSCRIPT_FIMO_gimmescan"
+output: html_notebook
+---
+
+###installation of rGREAT
+```{r}
+#BiocManager::install(c("rGREAT"))
+library(rGREAT)
+```
+
+###info about programs, OS, and packages
+```{r}
+sessionInfo()
+```
+
+###load input file
+```{r}
+mm10_hits = read.delim("~/Desktop/gimme.scan.results.f005.bed", header=FALSE)
+```
+
+###submit job to GREAT
+```{r}
+job = submitGreatJob(mm10_hits, species = "mm10")
+tb = getEnrichmentTables(job)
+res = plotRegionGeneAssociationGraphs(job, type = 1)
+res2 <- data.frame(seqnames=seqnames(res),
+                 starts=start(res)-1,
+                 ends=end(res),
+                 names=c(rep(".", length(res))),
+                 scores=elementMetadata(res)$gene,elementMetadata(res)$distTSS,
+                 strands=strand(res))
+```
+
+###Write results to table
+```{r}
+write.table(res2, "~/Desktop/gimme.scan.results.f005_rGREAT_output.txt", quote=F, sep="\t", row.names=F, col.names=F) 
+```
